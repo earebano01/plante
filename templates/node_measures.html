@@ -1,0 +1,29 @@
+{%extends "base.html"%}
+
+{% block content %}
+    <table id="node-measures-table" class="display table table-striped">
+        <thead>
+            <tr>
+                <th>Température (°C)</th>
+                <th>Humidité (%)</th>
+                <th>Lumière (lux)</th>
+                <th>Moisture (%)</th>
+                <th>Date et heure</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for measure in measures %}
+                <tr>
+                    <td>{{ measure.temp }}</td>
+                    <td>{{ measure.humidity }}</td>
+                    <td>{{ measure.light }}</td>
+                    <td>{{ measure.moist }}</td>
+                    <td>{{ measure.datetime }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+
+    <!-- Incluez les scripts nécessaires ici, comme jQuery et DataTables -->
+

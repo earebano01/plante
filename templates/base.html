@@ -274,35 +274,28 @@
 
 
         <!-- Main row -->
-        <div class="content-wrapper">
-          <!-- Content Header (Page header) -->
+        <section class="content">
+          <div class="container-fluid">
+            <div class="row">
         
-      
-          <!-- Main content -->
-          <section class="content">
-            <div class="container-fluid">
-             
-              <div class="row">
-                
-                
-
-                {% for node in nodes_data_json %}
-                <div class="col-md-6 chart-container">
-                  <canvas id="nodeChart{{ forloop.counter }}"></canvas>
-                </div>
-                {% endfor %}
-
-<!-- ... Reste de votre code HTML ... -->
-
-
-
+              {% for node in nodes_data_json %}
+              <div class="col-md-6 chart-container" align="center">
+                <canvas id="moistureChart{{ forloop.counter }}"></canvas>
+                <br/><br/> <br/><br/> <br/><br/>
               </div>
-
+              <div class="col-md-6 chart-container" align="center">
+                <canvas id="temperatureChart{{ forloop.counter }}"></canvas>
+                <br/><br/> <br/><br/> <br/><br/>
+              </div>
+              {% endfor %}
+        
+              {% block content %}
               
-
-
-            </div><!-- /.container-fluid -->
-          </section>
+              {% endblock %}
+            </div>
+          </div>
+        </section>
+        
           <!-- /.content -->
         </div>
       </section>
@@ -364,110 +357,223 @@
 
 <script>
   // Parse the JSON passed from Django into a JavaScript object
-  var nodesData = JSON.parse('{{ nodes_data_json|safe }}');
+  // var nodesData = JSON.parse('{{ nodes_data_json|safe }}');
 
-  // Loop over each node data to create a chart
-  nodesData.forEach(function(nodeData, index) {
-    // Find the canvas element where the chart will be rendered
-    var canvasId = 'nodeChart' + (index + 1);
-    var ctx = document.getElementById(canvasId).getContext('2d');
+  // // Loop over each node data to create a chart
+  // nodesData.forEach(function(nodeData, index) {
+  //   // Find the canvas element where the chart will be rendered
+  //   var canvasId = 'nodeChart' + (index + 1);
+  //   var ctx = document.getElementById(canvasId).getContext('2d');
 
-    // Create a new Chart instance
-    new Chart(ctx, {
-      type: 'line', // Define the type of chart
-      data: {
-        // Map the datetime and value fields to the labels and data arrays
-        labels: nodeData.measures.map(function(measure) {
-          return new Date(measure.fields.datetime).toLocaleString(); // Format date for readability
-        }),
-        datasets: [
-          {
-            label: 'Température (°C)',
-            data: nodeData.measures.map(function(measure) { return measure.fields.temp; }),
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            yAxisID: 'y-axis-temp',
+  //   // Extract moisture and temperature data for the current node
+  // // var moistureData = nodeData.measures.map(function(measure) {
+  // //   return measure.fields.moist; // Assuming 'moist' field contains moisture data
+  // // });
+
+  // // var temperatureData = nodeData.measures.map(function(measure) {
+  // //   return measure.fields.temp; // Assuming 'temperature' field contains temperature data
+  // // });
+
+  //   // Create a new Chart instance
+  //   new Chart(ctx, {
+  //     type: 'line', // Define the type of chart
+  //     data: {
+  //       // Map the datetime and value fields to the labels and data arrays
+  //       labels: nodeData.measures.map(function(measure) {
+  //         return new Date(measure.fields.datetime).toLocaleString(); // Format date for readability
+  //       }),
+  //       datasets: [
+          
+  //         {
+  //           label: 'Moisture (%)',
+  //           data: nodeData.measures.map(function(measure) { return measure.fields.moist; }),
+  //           backgroundColor: 'rgba(75, 192, 192, 0.2)', // Moisture color
+  //           borderColor: 'rgba(75, 192, 192, 1)',
+  //           borderWidth: 1,
+  //           yAxisID: 'y-axis-moist',
+  //         },
+  //         {
+  //           label: 'Temperature (C)',
+  //           data: nodeData.measures.map(function(measure) { return measure.fields.temp; }),
+  //           backgroundColor: 'rgba(255, 99, 132, 0.2)', // Temperature color
+  //         borderColor: 'rgba(255, 99, 132, 1)', 
+  //           borderWidth: 1,
+  //           yAxisID: 'y-axis-moist',
+  //         }
+  //       ]
+  //     },
+  //     options: {
+  //       responsive: true, // Make the chart responsive
+  //       title: {
+  //         display: true,
+  //         text: 'Node ' + nodeData.num_node // Display the node number as the chart title
+  //       },
+  //       scales: {
+  //         // Define multiple y axes for different data scales
+  //         yAxes: [
+          
+            
+  //           {
+  //             id: 'y-axis-moist',
+  //             type: 'linear',
+  //             position: 'right',
+  //             ticks: {
+  //               beginAtZero: true,
+  //             },
+  //             gridLines: {
+  //               display: false,
+  //             },
+  //           },
+  //           {
+  //             id: 'y-axis-temp',
+  //             type: 'linear',
+  //             position: 'right',
+  //             ticks: {
+  //               beginAtZero: true,
+  //             },
+  //             gridLines: {
+  //               display: false,
+  //             },
+  //           }
+  //         ]
+  //       }
+  //     }
+  //   });
+  // });
+
+  function createCharts(nodesData) {
+      var nodesData = JSON.parse('{{ nodes_data_json|safe }}');
+      nodesData.forEach(function (nodeData, index) {
+        var canvasId1 = 'moistureChart' + (index + 1);
+        var ctx1 = document.getElementById(canvasId1).getContext('2d');
+
+        var canvasId2 = 'temperatureChart' + (index + 1);
+        var ctx2 = document.getElementById(canvasId2).getContext('2d');
+
+        new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: nodeData.measures.map(function (measure) {
+              return new Date(measure.fields.datetime).toLocaleString();
+            }),
+            datasets: [
+              {
+                label: 'Moisture (%)',
+                data: nodeData.measures.map(function (measure) { return measure.fields.moist; }),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                yAxisID: 'y-axis-moist',
+              }
+            ]
           },
-          {
-            label: 'Humidité (%)',
-            data: nodeData.measures.map(function(measure) { return measure.fields.humidity; }),
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            yAxisID: 'y-axis-humidity',
-          },
-          {
-            label: 'Lumière (lux)',
-            data: nodeData.measures.map(function(measure) { return measure.fields.light; }),
-            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 1,
-            yAxisID: 'y-axis-light',
-          },
-          {
-            label: 'Moisture (%)',
-            data: nodeData.measures.map(function(measure) { return measure.fields.moist; }),
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            yAxisID: 'y-axis-moist',
-          }
-        ]
-      },
-      options: {
-        responsive: true, // Make the chart responsive
-        title: {
-          display: true,
-          text: 'Node ' + nodeData.num_node // Display the node number as the chart title
-        },
-        scales: {
-          // Define multiple y axes for different data scales
-          yAxes: [
-            {
-              id: 'y-axis-temp',
-              type: 'linear',
-              position: 'left',
-              ticks: {
-                beginAtZero: true,
-              },
+          options: {
+            responsive: true,
+            title: {
+              display: true,
+              text: 'Node ' + nodeData.num_node + ' Moisture'
             },
-            {
-              id: 'y-axis-humidity',
-              type: 'linear',
-              position: 'left',
-              ticks: {
-                beginAtZero: true,
-              },
-            },
-            {
-              id: 'y-axis-light',
-              type: 'linear',
-              position: 'right',
-              ticks: {
-                beginAtZero: true,
-              },
-              gridLines: {
-                display: false,
-              },
-            },
-            {
-              id: 'y-axis-moist',
-              type: 'linear',
-              position: 'right',
-              ticks: {
-                beginAtZero: true,
-              },
-              gridLines: {
-                display: false,
-              },
+            scales: {
+              yAxes: [
+                {
+                  id: 'y-axis-moist',
+                  type: 'linear',
+                  position: 'right',
+                  ticks: {
+                    beginAtZero: true,
+                  },
+                  gridLines: {
+                    display: false,
+                  },
+                }
+              ]
             }
-          ]
-        }
-      }
+          }
+        });
+
+        new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: nodeData.measures.map(function (measure) {
+              return new Date(measure.fields.datetime).toLocaleString();
+            }),
+            datasets: [
+              {
+                label: 'Temperature (°C)',
+                data: nodeData.measures.map(function (measure) { return measure.fields.temp; }),
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                yAxisID: 'y-axis-temp',
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            title: {
+              display: true,
+              text: 'Node ' + nodeData.num_node + ' Temperature'
+            },
+            scales: {
+              yAxes: [
+                {
+                  id: 'y-axis-temp',
+                  type: 'linear',
+                  position: 'right',
+                  ticks: {
+                    beginAtZero: true,
+                  },
+                  gridLines: {
+                    display: false,
+                  },
+                }
+              ]
+            }
+          }
+        });
+      });
+    }
+
+    function fetchDataAndRefreshCharts(apiUrl) {
+      fetch(apiUrl)
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          
+          Chart.helpers.each(Chart.instances, function (instance) {
+            instance.destroy();
+          });
+
+          createCharts(data); 
+        })
+        .catch(function (error) {
+          console.log('Error fetching data:', error);
+        });
+    }
+    
+    window.onload = function () {
+      fetchDataAndRefreshCharts('http://192.168.1.206:8000/api/measure/');
+
+      setInterval(function () {
+        fetchDataAndRefreshCharts('http://192.168.1.206:8000/api/measure/');
+      }, 5000);
+    };
+  </script>
+
+
+<script>
+  $(document).ready(function() {
+    // ... Votre code existant
+
+    // Ajoutez un gestionnaire d'événements pour rediriger vers la page des mesures du nœud
+    $('#datatable-container').on('click', 'tr', function() {
+      var node_id = $(this).find('td:first').text(); // Supposons que le premier TD contient l'ID du nœud
+      window.location.href = '/node_measures/' + node_id + '/';
     });
   });
 </script>
+
 
 
 
